@@ -1,0 +1,1 @@
+/home/slyva/code/personal/rust/ToDo/target/debug/myTest: /home/slyva/code/personal/rust/ToDo/src/cli.rs /home/slyva/code/personal/rust/ToDo/src/cli_handlers.rs /home/slyva/code/personal/rust/ToDo/src/cli_storage.rs /home/slyva/code/personal/rust/ToDo/src/config.rs /home/slyva/code/personal/rust/ToDo/src/main.rs
