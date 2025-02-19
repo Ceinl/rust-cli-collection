@@ -27,17 +27,20 @@ pub fn list_event(_file_path: &str)
     max_col_count: 5,
     margin: 2,
     };
-
     print_table(tasks,table_config);
 }
 
 fn print_table(tasks: Vec<cli_storage::Task>, config: TableConfig) 
 {
+
     let data = get_table_width(config);
     let content_height = get_table_height("123123".to_string(), data.0, data.2); 
 
-
+    // NONONO
+    let mut table: Vec<String> = Vec::new(); 
+    table.push(get_close_line(data.0,data.2));
     
+    table.push(get_close_line(data.0,data.2));
 }
 
 
@@ -65,5 +68,22 @@ fn get_table_height(content: String, width: u16, margin: u16) -> u16 {
     let content_height = (content.len() as f64 / content_width as f64).ceil() as u16;
     content_height
 }
+
+fn get_close_line(len:u16, margin: u16) -> String 
+{
+    format!("+{}+", "*".repeat((len - 2) as usize))
+} 
+
+
+
+
+
+
+
+
+
+
+
+
 
 
