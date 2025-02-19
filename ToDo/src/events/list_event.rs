@@ -5,7 +5,7 @@ use crate::cli_storage;
 
 // Acrual_colum = screen_width / ((table_width + gap) * column )
 
-struct table_config 
+struct TableConfig 
     {
         screen_width: u16,
         max_table_width: u16,
@@ -19,7 +19,7 @@ pub fn list_event(_file_path: &str)
 {
    let tasks = cli_storage::load_files(_file_path); 
 
-    let table_config = table_config {
+    let table_config = TableConfig{
     screen_width: 252,
     max_table_width: 50,
     min_table_width: 25,
@@ -31,16 +31,17 @@ pub fn list_event(_file_path: &str)
     print_table(tasks,table_config);
 }
 
-fn print_table(tasks: Vec<cli_storage::Task>, config: table_config) 
+fn print_table(tasks: Vec<cli_storage::Task>, config: TableConfig) 
 {
-   if let Some((Width(w), Height(h))) = terminal_size() 
-    {
-        println!("{}", w);
-    }
+    let data = get_table_width(config);
+    let content_height = get_table_height("123123".to_string(), data.0, data.2); 
+
+
+    
 }
 
 
-fn get_table(config: table_config) -> (u16, u16, u16) {
+fn get_table_width(config: TableConfig) -> (u16, u16, u16) {
     if let Some((Width(w), Height(_))) = terminal_size() {
         println!("{}", w);
     }
@@ -59,8 +60,10 @@ fn get_table(config: table_config) -> (u16, u16, u16) {
     (optimal_width, col_count, config.margin)
 }
 
-
-
-
+fn get_table_height(content: String, width: u16, margin: u16) -> u16 {
+    let content_width = width.saturating_sub(margin * 2 + 2).max(1) as usize;
+    let content_height = (content.len() as f64 / content_width as f64).ceil() as u16;
+    content_height
+}
 
 
