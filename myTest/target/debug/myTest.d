@@ -1,1 +1,0 @@
-/home/slyva/code/personal/rust/myTest/target/debug/myTest: /home/slyva/code/personal/rust/myTest/src/cli.rs /home/slyva/code/personal/rust/myTest/src/cli_handlers.rs /home/slyva/code/personal/rust/myTest/src/cli_storage.rs /home/slyva/code/personal/rust/myTest/src/config.rs /home/slyva/code/personal/rust/myTest/src/main.rs

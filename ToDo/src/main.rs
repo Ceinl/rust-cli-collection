@@ -2,7 +2,7 @@ mod cli;
 mod cli_handlers;
 mod cli_storage;
 mod config;
-
+mod events;
 fn main() 
 {
     config::load_config();

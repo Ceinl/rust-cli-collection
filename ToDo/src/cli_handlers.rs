@@ -1,7 +1,6 @@
-use terminal_size::{terminal_size,Width};
-use crate::cli_storage;
 use std::io::{self, Write};
- 
+use crate::events::list_event;
+use crate::cli_storage;
 // Handlers
 pub fn handle_matches(matches: clap::ArgMatches, _file_path: &str) {
     if matches.get_flag("add") { 
@@ -13,7 +12,7 @@ pub fn handle_matches(matches: clap::ArgMatches, _file_path: &str) {
         let id = id.parse::<u32>().expect("wrong argument");
         change_status_event(_file_path,id);
     } else if matches.get_flag("list") {
-        list_event(_file_path);
+       list_event::list_event(_file_path); 
     } else {
         help_event();
     }
@@ -55,12 +54,7 @@ fn change_status_event(_file_path: &str, id: u32 )
     }
     cli_storage::save_tasks(_file_path, &tasks);
 }
-fn list_event(_file_path: &str) 
-{
-    let tasks = cli_storage::load_files(_file_path); 
-    print_table("");
-    
-}
+
 fn help_event() { }
 
 
@@ -72,14 +66,4 @@ fn read_input(prompt: &str) -> String
     io::stdin().read_line(&mut input).unwrap();
     input.trim().to_string()
 }
-
-fn print_table(prompt: &str) 
-{
-   if let Some((Width(w), _)) = terminal_size() 
-    {
-        println!("{}",w);
-    }
-}
-
-
 
