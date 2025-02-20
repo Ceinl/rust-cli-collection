@@ -1,5 +1,5 @@
-use terminal_size::{terminal_size,Width, };
-use crate::cli_storage;
+use terminal_size::{terminal_size, Height, Width };
+use crate::cli_storage::{self, Task};
 
 
 struct TableConfig 
@@ -12,42 +12,59 @@ struct TableConfig
         margin:u16,
     }
 
+struct TableResult 
+    {
+    width: u16,
+    col_count: u16,
+    margin: u16,
+    }
+
 pub fn list_event(_file_path: &str) 
 {
-   let tasks = cli_storage::load_files(_file_path); 
+    let tasks = cli_storage::load_files(_file_path); 
+    let (Width(w), _) = terminal_size().unwrap();
 
     let table_config = TableConfig{
-    screen_width: 500,
+    screen_width: w,
     max_table_width: 100,
     min_table_width: 25,
     min_col_count: 1,
     max_col_count: 5,
     margin: 2,
     };
-    print_table(tasks,table_config);
+
+    print_tables(tasks,table_config);
 }
 
-fn print_table(tasks: Vec<cli_storage::Task>, config: TableConfig) {
-    let data = get_table_width(config);
-    let content_height = get_table_height("123123".to_string(), data.0, data.2); 
-    let mut tables: Vec<String> = vec![String::new(); content_height.into()];
-    let close_line = get_close_line(data.0);
-    let status_line = get_status_line(25, "Example".to_string(), true, data.0);
-    let double_close = format!("{} {}", close_line, close_line);
-    let double_status = format!("{} {}", status_line, status_line);
-    tables.push(double_close.clone());
-    tables.push(double_status);
-    tables.push(double_close.clone());
-    tables.extend(get_content_line(data.0, "asdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd".to_string()));
-    tables.push(double_close);
-    for line in tables {
-        println!("{}", line);
-    }
+fn print_tables(tasks: Vec<cli_storage::Task>, config: TableConfig) 
+{ 
+       let data = get_table_width(config);
+
+    let tables: Vec<Vec<String>> = tasks
+        .into_iter()
+        .map(|task| get_table(data.width, task))
+        .collect();
+    
+    
 }
-fn get_table_width(config: TableConfig) -> (u16, u16, u16) {
-    //if let Some((Width(w), Height(_))) = terminal_size() {
-    //   println!("{}", w);
-    //}
+
+fn get_table(width: u16, task: cli_storage::Task) -> Vec<String>
+{
+    let mut table: Vec<String> = Vec::new();
+    let close_line = get_close_line(width);
+    let status_line = get_status_line(task.id, task.name, task.status, width);
+    let content = get_content_line(width, task.content);
+    table.push(close_line.clone());
+    table.push(status_line);
+    table.push(close_line.clone());
+    table.extend(content);
+    table.push(close_line);
+    table
+}
+
+
+fn get_table_width(config: TableConfig) -> TableResult
+{
     let possible_cols = ((config.screen_width - config.margin) as f32
         / (config.min_table_width + config.margin) as f32)
         .round() as u16;
@@ -60,7 +77,9 @@ fn get_table_width(config: TableConfig) -> (u16, u16, u16) {
     if optimal_width < config.min_table_width {
         panic!("Cant reach minimal table width, please check a config");
     }
-    (optimal_width, col_count, config.margin)
+    
+    TableResult{width: optimal_width, col_count: col_count, margin: config.margin}
+    
 }
 
 fn get_table_height(content: String, width: u16, margin: u16) -> u16 {
@@ -74,7 +93,7 @@ fn get_close_line(len:u16) -> String
     format!("+{}+", "-".repeat((len - 2) as usize))
 } 
 
-fn get_status_line(id: u16, name: String, status: bool, width: u16) -> String {
+fn get_status_line(id: u32, name: String, status: bool, width: u16) -> String {
     let _id = format!("| {} |", id);
     let _status = format!("{} |", status);
     let name_max_len = width as usize - _id.len() - _status.len();
