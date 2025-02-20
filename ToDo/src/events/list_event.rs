@@ -36,16 +36,31 @@ pub fn list_event(_file_path: &str)
     print_tables(tasks,table_config);
 }
 
-fn print_tables(tasks: Vec<cli_storage::Task>, config: TableConfig) 
-{ 
-       let data = get_table_width(config);
-
+fn print_tables(tasks: Vec<cli_storage::Task>, config: TableConfig) {
+    let data = get_table_width(config);
     let tables: Vec<Vec<String>> = tasks
         .into_iter()
         .map(|task| get_table(data.width, task))
         .collect();
-    
-    
+    let margin_str = " ".repeat(data.margin as usize);
+
+    for chunk in tables.chunks(data.col_count as usize) {
+        let max_height = chunk.iter().map(|t| t.len()).max().unwrap_or(0);
+        for row in 0..max_height {
+            let line_parts: Vec<String> = chunk
+                .iter()
+                .map(|table| {
+                    if row < table.len() {
+                        table[row].clone()
+                    } else {
+                        " ".repeat(data.width as usize)
+                    }
+                })
+                .collect();
+            println!("{}{}", margin_str, line_parts.join(&margin_str));
+        }
+        println!();
+    }
 }
 
 fn get_table(width: u16, task: cli_storage::Task) -> Vec<String>
@@ -82,23 +97,23 @@ fn get_table_width(config: TableConfig) -> TableResult
     
 }
 
-fn get_table_height(content: String, width: u16, margin: u16) -> u16 {
-    let content_width = width.saturating_sub(margin * 2 + 2).max(1) as usize;
-    let content_height = (content.len() as f64 / content_width as f64).ceil() as u16;
-    content_height
-}
-
 fn get_close_line(len:u16) -> String 
 {
     format!("+{}+", "-".repeat((len - 2) as usize))
 } 
 
 fn get_status_line(id: u32, name: String, status: bool, width: u16) -> String {
-    let _id = format!("| {} |", id);
-    let _status = format!("{} |", status);
-    let name_max_len = width as usize - _id.len() - _status.len();
-    let _name = format!("{}{}|", name, " ".repeat(name_max_len.saturating_sub(1)));
-    format!("{}{}{}", _id, _name, _status)
+    let id_field = format!("| {} |", id);
+    let status_field = format!("{} |", status);
+    let width = width as usize;
+    let name_field_width = width - id_field.len() - status_field.len();
+    let truncated_name: String = name.chars().take(name_field_width).collect();
+    let padded_name = format!(
+        "{}{}",
+        truncated_name,
+        " ".repeat(name_field_width.saturating_sub(truncated_name.len()))
+    );
+    format!("{}{}{}", id_field, padded_name, status_field)
 }
 
 fn get_content_line(width: u16, content: String) -> Vec<String> 
